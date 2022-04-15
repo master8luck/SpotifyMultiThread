@@ -1,6 +1,5 @@
 package com.example.spotifymultithread.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.spotifymultithread.repository.SpotifyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,11 +25,9 @@ class SearchViewModel @Inject constructor(
         for (i in 0..1) {
             runThread(query, i)
         }
-
     }
 
     private fun runThread(query: String, threadId: Int) {
-        Log.d("qwe", "runThread: $threadId ${Thread.currentThread().id}")
         lastOffset += 10
         repository.search(query, lastOffset)
             .subscribeOn(Schedulers.io())
@@ -46,7 +43,6 @@ class SearchViewModel @Inject constructor(
 
             })
     }
-
 
     private fun getQuery(href: String) =
         href.replaceBefore("?", "")

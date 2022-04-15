@@ -4,6 +4,7 @@ import com.example.spotifymultithread.model.SearchResponse
 import io.reactivex.rxjava3.core.Single
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface SpotifyAPI {
@@ -16,5 +17,12 @@ interface SpotifyAPI {
         @Query("limit") limit: Int = 10,
         @Query("offset") offset: Int = 0,
     ): Single<SearchResponse>
+
+    @GET("tracks/{id}")
+    fun getDetail(
+        @Header("Authorization") refreshToken: String,
+        @Path("id") trackId: String,
+    ): Single<Any>
+
 
 }

@@ -22,10 +22,10 @@ class SpotifyRepository @Inject constructor(
 
     private lateinit var token: String
     var query = ""
-    val tracks : LiveData<List<Track>> by lazy { trackDao.getTracks() }
+    val tracks: LiveData<List<Track>> by lazy { trackDao.getTracks() }
 
     init {
-        authApi.getToken(bearer =  genAuthKey())
+        authApi.getToken(bearer = genAuthKey())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io())
             .subscribe({
@@ -48,9 +48,12 @@ class SpotifyRepository @Inject constructor(
     fun search(query: String, offset: Int) =
         spotifyAPI.getTracks(refreshToken = token, query = query, offset = offset)
 
-    fun fetchDetail() {
+    fun fetchDetail(href: String) =
+        spotifyAPI.getDetail(
+            refreshToken = token,
+            trackId = href.replaceBeforeLast("/", "").drop(1)
+        )
 
-    }
 
     fun insert(tracks: List<Track>) {
         trackDao.insert(tracks)

@@ -10,6 +10,8 @@ import androidx.navigation.fragment.navArgs
 import com.example.spotifymultithread.databinding.FragmentDetailBinding
 import com.example.spotifymultithread.viewmodel.DetailViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 @AndroidEntryPoint
 class DetailFragment : Fragment() {
@@ -28,7 +30,13 @@ class DetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.fetchData()
-        binding.tvInfo.text = args.href
+        viewModel.fetchData(args.href)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.io())
+            .subscribe ({ detailData ->
+                binding.tvInfo.text = detailData.toString()
+            }, {
+
+            })
     }
 }

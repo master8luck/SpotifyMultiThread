@@ -5,6 +5,6 @@
     <item
         android:id="@+id/action_stop"
         android:title="@string/stop"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="ifRoom" />
 
 </menu>

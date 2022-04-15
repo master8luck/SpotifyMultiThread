@@ -9,5 +9,5 @@ import javax.inject.Inject
 class DetailViewModel @Inject constructor(
     private val repository: SpotifyRepository,
 ): ViewModel() {
-    fun fetchData() = repository.fetchDetail()
+    fun fetchData(href: String) = repository.fetchDetail(href)
 }
