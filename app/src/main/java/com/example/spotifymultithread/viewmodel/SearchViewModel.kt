@@ -1,63 +1,50 @@
 package com.example.spotifymultithread.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.spotifymultithread.repository.SpotifyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val repository: SpotifyRepository,
-): ViewModel() {
+) : ViewModel() {
 
-    var countDownTimer: Disposable? = null
-    private val availableIds = mutableListOf(0, 1, 2)
-    private var queriesDone = 0
     private var lastOffset = 0
+    private var stopThreads: Boolean = false
 
     val tracks = repository.tracks
 
     fun search(query: String) {
+        stopThreads = false
         repository.query = query
-        queriesDone = 0
         lastOffset = 0
         repository.clearTracks()
 
-        if (countDownTimer != null) {
-            countDownTimer!!.dispose()
+        for (i in 0..1) {
+            runThread(query, i)
         }
-        countDownTimer = Observable.interval(50, TimeUnit.MILLISECONDS)
-            .subscribe {
-                runThread(query)
-                if (queriesDone > 9)
-                    countDownTimer!!.dispose()
-            }
-
 
     }
 
-    private fun runThread(query: String) {
-        if (availableIds.size > 0) {
-            val id = availableIds[0]
-            availableIds.removeAt(0)
-            repository.search(query, lastOffset)
-                .subscribeOn(Schedulers.io())
-                .subscribe({ tracks ->
-                    availableIds.add(0, id)
-                    if (getQuery(tracks.tracksResponse.href) == query) {
-                        Thread.sleep((50..350).random().toLong())
-                        repository.insert(tracks.tracksResponse.items.onEach { it.threadId = id })
-                        queriesDone++
-                        lastOffset += 10
-                    }
-                }, {
-                    availableIds.add(0, id)
-                })
-        }
+    private fun runThread(query: String, threadId: Int) {
+        Log.d("qwe", "runThread: $threadId ${Thread.currentThread().id}")
+        lastOffset += 10
+        repository.search(query, lastOffset)
+            .subscribeOn(Schedulers.io())
+            .subscribe({ tracks ->
+                if (getQuery(tracks.tracksResponse.href) == query && !stopThreads) {
+                    repository.insert(tracks.tracksResponse.items.onEach { it.threadId = threadId })
+
+                    if (lastOffset < 100 && lastOffset < tracks.tracksResponse.total)
+                        runThread(query, threadId)
+
+                }
+            }, {
+
+            })
     }
 
 
@@ -67,5 +54,9 @@ class SearchViewModel @Inject constructor(
             .replaceBefore("=", "")
             .replace("=", "")
             .replace("&", "")
+
+    fun stopThreads() {
+        stopThreads = true
+    }
 
 }

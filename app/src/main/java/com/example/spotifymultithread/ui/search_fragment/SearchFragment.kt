@@ -1,12 +1,11 @@
 package com.example.spotifymultithread.ui.search_fragment
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.example.spotifymultithread.R
 import com.example.spotifymultithread.databinding.FragmentSearchBinding
 import com.example.spotifymultithread.viewmodel.SearchViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -24,6 +23,7 @@ class SearchFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentSearchBinding.inflate(inflater)
+        setHasOptionsMenu(true)
         return binding.root
     }
 
@@ -54,6 +54,21 @@ class SearchFragment : Fragment() {
                 href
             )
         )
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.action_stop -> {
+                viewModel.stopThreads()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
 }
